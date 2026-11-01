@@ -22,11 +22,21 @@ from tools.tavily_tool import tavily_search
 from tools.flight_tool import search_flights
 
 
+Database_URL = os.getenv("Database_URL")
+
+import streamlit as st
+
+# Bridge Streamlit Cloud secrets to environment variables so LangChain/Groq can read them
+if hasattr(st, "secrets") and "GROQ_API_KEY" in st.secrets:
+    os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
+if hasattr(st, "secrets") and "Tavily_API_key" in st.secrets:
+    os.environ["Tavily_API_key"] = st.secrets["Tavily_API_key"]
+if hasattr(st, "secrets") and "Database_URL" in st.secrets:
+    os.environ["Database_URL"] = st.secrets["Database_URL"]
+    
 llm = ChatGroq(
     model="openai/gpt-oss-120b"
 )
-
-Database_URL = os.getenv("Database_URL")
 
 class TravelState(TypedDict):
     message: Annotated[list[AnyMessage], operator.add]
