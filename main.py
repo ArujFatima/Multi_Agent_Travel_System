@@ -120,9 +120,14 @@ graph.add_edge("itinerary_agent", "final_agent")
 graph.add_edge("final_agent", END)
 
 #connect langrapg to postgres
-_conn = psycopg.connect(Database_URL, autocommit=True)   
-checkpoint = PostgresSaver(_conn)
-checkpoint.setup()
+# Try connecting to PostgreSQL; fallback to MemorySaver if unavailable on cloud
+try:
+    _conn = psycopg.connect(Database_URL, autocommit=True)
+    checkpointer = PostgresSaver(_conn)
+    checkpointer.setup()
+except Exception as e:
+    from langgraph.checkpoint.memory import MemorySaver
+    checkpointer = MemorySaver()
 
 #Use Database to store/save conversation
 app = graph.compile(checkpointer=checkpoint)
